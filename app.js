@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
+const { limiter } = require('./utils/constants');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const errorHandler = require('./middlewares/error_handler');
 const routes = require('./routes/index');
@@ -22,13 +22,6 @@ mongoose.connect(DB_URL, {
 const app = express();
 
 app.use(cors());
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 app.use(helmet());
 app.use(bodyParser.json());

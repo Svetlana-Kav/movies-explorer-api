@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const ValidationError = require('../errors/validation-error');
 const DuplicateKeyError = require('../errors/duplicate-key-error');
 const DocumentNotFoundError = require('../errors/document-not-found-error');
 const IncorrectRequest = require('../errors/incorrect-request-error');
+const ForbiddenError = require('../errors/forbidden-error');
 require('dotenv').config();
 
 const { JWT_SECRET, NODE_ENV } = process.env;
@@ -43,7 +43,7 @@ module.exports.createUser = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            next(new ValidationError('Неправильный запрос'));
+            next(new ForbiddenError('Неправильный запрос'));
           }
           if (err.code === 11000) {
             next(new DuplicateKeyError('Пользователь с таким email уже существует'));
@@ -86,6 +86,9 @@ module.exports.editProfile = (req, res, next) => {
       }
       if (err.name === 'DocumentNotFoundError') {
         next(new DocumentNotFoundError('Запрашиваемые данные не найдены.'));
+      }
+      if (err.code === 11000) {
+        next(new DuplicateKeyError('Такой пользователь уже зарегистрирован.'));
       } else {
         next(err);
       }
